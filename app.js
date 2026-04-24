@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'zhichat-state-v2';
-const DEFAULT_API_BASE = 'http://localhost:4174/api';
+const DEFAULT_API_BASE = '/api';
 const DEFAULT_MODEL = 'mimo-v2.5-pro';
 
 const MODELS = [
