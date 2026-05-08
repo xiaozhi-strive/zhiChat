@@ -1063,6 +1063,16 @@ kbd {
   opacity: 0.45;
 }
 
+.send-btn.stop-mode {
+  background: linear-gradient(135deg, var(--danger), #da3633);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+.send-btn.stop-mode:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

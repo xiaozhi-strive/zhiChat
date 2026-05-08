@@ -73,6 +73,7 @@ const state = {
     theme: 'dark',
   },
   isStreaming: false,
+  abortController: null,
 };
 
 const els = {};
@@ -140,7 +141,10 @@ function configureMarkdown() {
 
 function bindEvents() {
   els.newChatBtn.addEventListener('click', () => createNewConversation());
-  els.sendBtn.addEventListener('click', () => handleSend());
+  els.sendBtn.addEventListener('click', () => {
+    if (state.isStreaming) handleStop();
+    else handleSend();
+  });
   els.chatInput.addEventListener('input', () => {
     autoResizeTextarea();
     updateSendButtonState();
@@ -267,7 +271,7 @@ function applyTheme(theme, shouldNotify = false) {
 function handleInputKeydown(event) {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault();
-    handleSend();
+    if (!state.isStreaming) handleSend();
   }
 }
 
@@ -279,7 +283,17 @@ function autoResizeTextarea() {
 
 function updateSendButtonState() {
   const hasText = Boolean(els.chatInput.value.trim());
-  els.sendBtn.disabled = !hasText || state.isStreaming;
+  if (state.isStreaming) {
+    els.sendBtn.disabled = false;
+    els.sendBtn.classList.add('stop-mode');
+    els.sendBtn.title = '停止生成';
+    els.sendBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>`;
+  } else {
+    els.sendBtn.disabled = !hasText;
+    els.sendBtn.classList.remove('stop-mode');
+    els.sendBtn.title = '发送';
+    els.sendBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+  }
 }
 
 function generateId() {
@@ -569,6 +583,11 @@ function scrollToBottom() {
   });
 }
 
+function handleStop() {
+  if (!state.isStreaming || !state.abortController) return;
+  state.abortController.abort();
+}
+
 async function handleSend() {
   if (state.isStreaming) return;
   const content = els.chatInput.value.trim();
@@ -597,6 +616,7 @@ async function handleSend() {
   els.chatInput.value = '';
   autoResizeTextarea();
   state.isStreaming = true;
+  state.abortController = new AbortController();
   updateSendButtonState();
 
   const aiRenderer = appendAIMessage();
@@ -605,6 +625,7 @@ async function handleSend() {
   try {
     const protocol = conv.protocol || state.settings.protocol;
     const normalizedMessages = normalizeMessagesForSending(conv.messages);
+    const signal = state.abortController.signal;
 
     const onChunk = (chunk) => {
       assistantContent += chunk;
@@ -612,21 +633,32 @@ async function handleSend() {
     };
 
     if (protocol === 'anthropic') {
-      await sendAnthropic(normalizedMessages, conv.model, onChunk);
+      await sendAnthropic(normalizedMessages, conv.model, onChunk, signal);
     } else {
-      await sendOpenAI(normalizedMessages, conv.model, onChunk);
+      await sendOpenAI(normalizedMessages, conv.model, onChunk, signal);
     }
 
-    const assistantMessage = { role: 'assistant', content: assistantContent || '（空响应）' };
+    const finalContent = assistantContent || '（空响应）';
+    const assistantMessage = { role: 'assistant', content: finalContent };
     conv.messages.push(assistantMessage);
     conv.updatedAt = Date.now();
-    aiRenderer.finish(assistantMessage.content);
+    aiRenderer.finish(finalContent);
   } catch (error) {
-    const errorText = formatRequestError(error);
+    const isAbort = error.name === 'AbortError';
+    const errorText = isAbort ? '已停止生成' : formatRequestError(error);
+    const finalContent = assistantContent || '';
+    const assistantMessage = {
+      role: 'assistant',
+      content: finalContent || errorText,
+      isError: !finalContent,
+    };
+    conv.messages.push(assistantMessage);
+    conv.updatedAt = Date.now();
     aiRenderer.error(errorText);
-    showToast(errorText, 'error');
+    if (!isAbort) showToast(errorText, 'error');
   } finally {
     state.isStreaming = false;
+    state.abortController = null;
     saveState();
     renderConversationList();
     updateSendButtonState();
@@ -643,7 +675,7 @@ function normalizeMessagesForSending(messages) {
     .filter((msg) => msg.content.trim());
 }
 
-async function sendOpenAI(messages, model, onChunk) {
+async function sendOpenAI(messages, model, onChunk, signal) {
   const response = await fetch(`${normalizeApiBase(state.settings.apiBase)}/v1/chat/completions`, {
     method: 'POST',
     headers: {
@@ -651,6 +683,7 @@ async function sendOpenAI(messages, model, onChunk) {
       ...(state.settings.apiKey ? { Authorization: `Bearer ${state.settings.apiKey}` } : {}),
     },
     body: JSON.stringify({ model, messages, stream: true }),
+    signal,
   });
 
   await ensureResponseOk(response);
@@ -661,7 +694,7 @@ async function sendOpenAI(messages, model, onChunk) {
   });
 }
 
-async function sendAnthropic(messages, model, onChunk) {
+async function sendAnthropic(messages, model, onChunk, signal) {
   const systemMessages = messages.filter((item) => item.role === 'system').map((item) => item.content).join('\n\n');
   const convertedMessages = messages
     .filter((item) => item.role !== 'system')
@@ -681,6 +714,7 @@ async function sendAnthropic(messages, model, onChunk) {
       ...(state.settings.apiKey ? { 'x-api-key': state.settings.apiKey } : {}),
     },
     body: JSON.stringify(payload),
+    signal,
   });
 
   await ensureResponseOk(response);

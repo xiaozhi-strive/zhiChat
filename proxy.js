@@ -106,7 +106,7 @@ const server = http.createServer((req, res) => {
   }
 
   // /api/* 转发代理
-  if (req.url.startsWith('/api/')) {
+  if (req.url.startsWith('/api/') || req.url === '/api') {
     proxyRequest(req, res);
     return;
   }
