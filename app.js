@@ -182,13 +182,18 @@ function bindEvents() {
 
   els.hamburgerBtn.addEventListener('click', (event) => {
     event.preventDefault();
+    event.stopPropagation();
     openSidebar();
   });
   els.sidebarCloseBtn.addEventListener('click', (event) => {
     event.preventDefault();
+    event.stopPropagation();
     closeSidebar();
   });
-  els.sidebarOverlay.addEventListener('click', closeSidebar);
+  els.sidebarOverlay.addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeSidebar();
+  });
 
   els.conversationsList.addEventListener('click', (event) => {
     const deleteBtn = event.target.closest('.conversation-delete-btn');
@@ -765,6 +770,10 @@ function selectModel(model) {
   renderConversationList();
   els.modelSelector.classList.remove('open');
 
+  // 更新底部模型提示
+  const protocol = conv.protocol || state.settings.protocol;
+  els.footerModelHint.textContent = `${target.id} · ${protocol === 'anthropic' ? 'Anthropic' : 'OpenAI'}`;
+
   if (target.mode === 'tts') {
     showToast(`${target.name} 属于 TTS 模型，普通聊天场景可能受接口限制`, 'error');
   } else {
@@ -831,11 +840,13 @@ function toggleApiKeyVisibility() {
 function openSidebar() {
   els.sidebar.classList.add('open');
   els.sidebarOverlay.classList.add('active');
+  els.body.style.overflow = 'hidden';
 }
 
 function closeSidebar() {
   els.sidebar.classList.remove('open');
   els.sidebarOverlay.classList.remove('active');
+  els.body.style.overflow = '';
 }
 
 function saveState() {

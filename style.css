@@ -21,6 +21,7 @@
   --code-bg: #0b1016;
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.38);
   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.28);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.18);
   --radius-xl: 20px;
   --radius-lg: 16px;
   --radius-md: 12px;
@@ -28,7 +29,8 @@
   --sidebar-width: 260px;
   --content-width: 860px;
   --header-height: 72px;
-  --transition: 180ms ease;
+  --transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   color-scheme: dark;
 }
 
@@ -205,11 +207,32 @@ kbd {
   color: var(--text-primary);
   font-weight: 600;
   transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.new-chat-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.new-chat-btn:hover::before {
+  opacity: 0.12;
 }
 
 .new-chat-btn:hover {
   border-color: color-mix(in srgb, var(--accent) 55%, var(--border-color));
-  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+
+.new-chat-btn svg,
+.new-chat-btn span {
+  position: relative;
+  z-index: 1;
 }
 
 .conversations-section {
@@ -242,17 +265,32 @@ kbd {
   padding: 10px;
   border-radius: 12px;
   color: var(--text-secondary);
-  transition: background var(--transition), color var(--transition);
+  transition: background var(--transition), color var(--transition), transform var(--transition-fast);
+  cursor: pointer;
 }
 
 .conversation-item:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+  transform: translateX(2px);
 }
 
 .conversation-item.active {
   background: var(--accent-soft);
   color: var(--text-primary);
+  position: relative;
+}
+
+.conversation-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
 }
 
 .conversation-main {
@@ -379,14 +417,16 @@ kbd {
   border-radius: 14px;
   background: var(--bg-secondary);
   color: var(--text-primary);
-  transition: border-color var(--transition), background var(--transition), color var(--transition);
+  transition: border-color var(--transition), background var(--transition), color var(--transition), box-shadow var(--transition);
   user-select: none;
+  cursor: pointer;
 }
 
 .model-selector-display:hover,
 .model-selector.open .model-selector-display {
   border-color: color-mix(in srgb, var(--accent) 50%, var(--border-color));
   background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .model-icon {
@@ -414,7 +454,7 @@ kbd {
   background: var(--bg-elevated);
   box-shadow: var(--shadow-lg);
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-8px) scale(0.96);
   visibility: hidden;
   pointer-events: none;
   transition: all var(--transition);
@@ -423,7 +463,7 @@ kbd {
 
 .model-selector.open .model-dropdown {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   visibility: visible;
   pointer-events: auto;
 }
@@ -501,6 +541,16 @@ kbd {
   justify-content: center;
   padding: 36px 22px 96px;
   text-align: center;
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .welcome-screen.hidden {
@@ -510,6 +560,16 @@ kbd {
 .welcome-logo {
   margin-bottom: 22px;
   filter: drop-shadow(0 16px 36px color-mix(in srgb, var(--accent) 22%, transparent));
+  animation: floatAnimation 3s ease-in-out infinite;
+}
+
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .welcome-title {
@@ -545,13 +605,19 @@ kbd {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 96%, transparent), color-mix(in srgb, var(--bg-primary) 96%, transparent));
   color: var(--text-primary);
   text-align: left;
-  transition: transform var(--transition), border-color var(--transition), background var(--transition);
+  transition: transform var(--transition), border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  cursor: pointer;
 }
 
 .suggestion-card:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg-hover) 96%, transparent), color-mix(in srgb, var(--bg-primary) 96%, transparent));
+  box-shadow: var(--shadow-sm);
+}
+
+.suggestion-card:active {
+  transform: translateY(0);
 }
 
 .suggestion-card svg {
@@ -575,6 +641,18 @@ kbd {
   border: 1px solid var(--border-color);
   border-radius: 18px;
   box-shadow: var(--shadow-md);
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .user-avatar,
@@ -622,6 +700,18 @@ kbd {
 .ai-content {
   flex: 1;
   min-width: 0;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .message-text {
@@ -706,6 +796,12 @@ kbd {
   border-radius: 16px;
   overflow: hidden;
   background: var(--code-bg);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.code-block:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .code-block-header {
@@ -734,12 +830,18 @@ kbd {
   border-radius: 10px;
   background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
   color: var(--text-secondary);
-  transition: background var(--transition), color var(--transition);
+  font-size: 12px;
+  transition: background var(--transition), color var(--transition), transform var(--transition-fast);
 }
 
 .copy-code-btn:hover {
   background: var(--accent-soft);
   color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.copy-code-btn:active {
+  transform: translateY(0);
 }
 
 .code-block pre {
@@ -846,15 +948,21 @@ kbd {
   border-radius: 50%;
   background: color-mix(in srgb, var(--accent) 24%, transparent);
   color: #fff;
-  transition: transform var(--transition), background var(--transition), opacity var(--transition);
+  transition: transform var(--transition), background var(--transition), opacity var(--transition), box-shadow var(--transition);
 }
 
 .send-btn:not(:disabled) {
   background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .send-btn:not(:disabled):hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.send-btn:not(:disabled):active {
+  transform: translateY(0) scale(1);
 }
 
 .send-btn:disabled {
@@ -869,11 +977,11 @@ kbd {
   justify-content: center;
   padding: 20px;
   background: var(--overlay);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--transition), visibility var(--transition), background var(--transition);
+  transition: opacity var(--transition), visibility var(--transition), background var(--transition), backdrop-filter var(--transition);
   z-index: 60;
 }
 
@@ -890,6 +998,18 @@ kbd {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 98%, transparent), color-mix(in srgb, var(--bg-primary) 98%, transparent));
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header,
@@ -1111,17 +1231,32 @@ kbd {
   border-radius: 14px;
   border: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
+  backdrop-filter: blur(12px);
   box-shadow: var(--shadow-md);
   color: var(--text-primary);
   font-size: 14px;
+  animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .toast.success {
   border-color: color-mix(in srgb, var(--success) 36%, var(--border-color));
+  background: color-mix(in srgb, var(--success) 8%, var(--bg-elevated));
 }
 
 .toast.error {
   border-color: color-mix(in srgb, var(--danger) 36%, var(--border-color));
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-elevated));
 }
 
 @media (max-width: 1024px) {
