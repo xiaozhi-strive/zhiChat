@@ -91,7 +91,6 @@ function init() {
   syncSettingsToUI();
   renderConversationList();
   renderCurrentConversation();
-  updateProtocolButtons();
   updateModelUI(getCurrentConversation().model);
   updateSendButtonState();
   autoResizeTextarea();
@@ -122,8 +121,9 @@ function cacheElements() {
   els.toggleApiKey = document.getElementById('toggleApiKey');
   els.radioOpenAI = document.getElementById('radioOpenAI');
   els.radioAnthropic = document.getElementById('radioAnthropic');
-  els.protoOpenAI = document.getElementById('protoOpenAI');
-  els.protoAnthropic = document.getElementById('protoAnthropic');
+  els.aiStudyMenu = document.getElementById('aiStudyMenu');
+  els.aiStudyBtn = document.getElementById('aiStudyBtn');
+  els.aiStudyDropdown = document.getElementById('aiStudyDropdown');
   els.modelSelector = document.getElementById('modelSelector');
   els.modelSelectorDisplay = document.getElementById('modelSelectorDisplay');
   els.modelDropdown = document.getElementById('modelDropdown');
@@ -156,8 +156,12 @@ function bindEvents() {
   });
 
   els.toggleApiKey.addEventListener('click', toggleApiKeyVisibility);
-  els.protoOpenAI.addEventListener('click', () => updateProtocol('openai'));
-  els.protoAnthropic.addEventListener('click', () => updateProtocol('anthropic'));
+
+  els.aiStudyBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    els.aiStudyMenu.classList.toggle('open');
+  });
 
   els.modelSelectorDisplay.addEventListener('click', (event) => {
     event.preventDefault();
@@ -177,6 +181,9 @@ function bindEvents() {
   document.addEventListener('click', (event) => {
     if (!els.modelSelector.contains(event.target)) {
       els.modelSelector.classList.remove('open');
+    }
+    if (!els.aiStudyMenu.contains(event.target)) {
+      els.aiStudyMenu.classList.remove('open');
     }
   });
 
@@ -300,7 +307,6 @@ function createNewConversation(options = {}) {
   renderConversationList();
   renderCurrentConversation();
   updateModelUI(conversation.model);
-  updateProtocolButtons(conversation.protocol);
 
   if (!options.silent) {
     els.chatInput.focus();
@@ -326,7 +332,6 @@ function switchConversation(id) {
   renderCurrentConversation();
   const conv = getCurrentConversation();
   updateModelUI(conv.model);
-  updateProtocolButtons(conv.protocol);
 }
 
 function deleteConversation(id) {
@@ -349,7 +354,6 @@ function deleteConversation(id) {
   renderCurrentConversation();
   const conv = getCurrentConversation();
   updateModelUI(conv.model);
-  updateProtocolButtons(conv.protocol);
   showToast('对话已删除', 'success');
 }
 
@@ -739,25 +743,6 @@ async function ensureResponseOk(response) {
   throw new Error(errorText);
 }
 
-function updateProtocol(protocol) {
-  const conv = getCurrentConversation();
-  conv.protocol = protocol;
-  conv.updatedAt = Date.now();
-  state.settings.protocol = protocol;
-  saveState();
-  updateProtocolButtons(protocol);
-  renderConversationList();
-  updateModelUI(conv.model);
-}
-
-function updateProtocolButtons(protocol) {
-  const resolvedProtocol = protocol || state.conversations.get(state.currentConvId)?.protocol || state.settings.protocol || 'openai';
-  els.protoOpenAI.classList.toggle('active', resolvedProtocol === 'openai');
-  els.protoAnthropic.classList.toggle('active', resolvedProtocol === 'anthropic');
-  els.radioOpenAI.checked = resolvedProtocol === 'openai';
-  els.radioAnthropic.checked = resolvedProtocol === 'anthropic';
-}
-
 function selectModel(model) {
   const target = getModelMeta(model);
   if (!target || state.isStreaming) return;
@@ -826,7 +811,6 @@ function saveSettingsFromModal() {
   conv.updatedAt = Date.now();
 
   saveState();
-  updateProtocolButtons(protocol);
   updateModelUI(conv.model);
   renderConversationList();
   closeSettingsModal();

@@ -123,9 +123,50 @@
         </div>
 
         <!-- 协议切换 -->
-        <div class="protocol-toggle" id="protocolToggle">
-          <button class="protocol-btn active" data-protocol="openai" id="protoOpenAI">OpenAI</button>
-          <button class="protocol-btn" data-protocol="anthropic" id="protoAnthropic">Anthropic</button>
+        <div class="ai-study-menu" id="aiStudyMenu">
+          <button class="ai-study-btn" id="aiStudyBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <span>AI Study</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-icon">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="ai-study-dropdown" id="aiStudyDropdown">
+            <a href="https://www.deepseek.com/" target="_blank" rel="noopener noreferrer" class="ai-study-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              <div class="link-content">
+                <div class="link-title">DeepSeek</div>
+                <div class="link-desc">深度求索 AI 平台</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+            <a href="https://aihot.virxact.com/" target="_blank" rel="noopener noreferrer" class="ai-study-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              <div class="link-content">
+                <div class="link-title">AI HOT</div>
+                <div class="link-desc">AI 资讯热点追踪</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+          </div>
         </div>
       </header>
 

@@ -182,12 +182,20 @@ kbd {
   border-radius: 12px;
   color: var(--text-secondary);
   transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
 }
 
 .sidebar-close-btn:hover,
 .hamburger-btn:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* 桌面端隐藏侧边栏关闭按钮 */
+@media (min-width: 769px) {
+  .sidebar-close-btn {
+    display: none;
+  }
 }
 
 .sidebar-actions {
@@ -490,30 +498,116 @@ kbd {
   color: var(--text-secondary);
 }
 
-.protocol-toggle {
+.ai-study-menu {
+  position: relative;
+}
+
+.ai-study-btn {
+  min-width: 140px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
-.protocol-btn {
-  min-width: 98px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 10px;
-  color: var(--text-secondary);
-  font-size: 13px;
+  color: var(--text-primary);
   font-weight: 600;
-  transition: background var(--transition), color var(--transition);
+  font-size: 14px;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  cursor: pointer;
 }
 
-.protocol-btn.active {
-  background: var(--accent);
-  color: #fff;
+.ai-study-btn:hover,
+.ai-study-menu.open .ai-study-btn {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border-color));
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ai-study-btn .chevron-icon {
+  margin-left: auto;
+  color: var(--text-secondary);
+  transition: transform var(--transition);
+}
+
+.ai-study-menu.open .ai-study-btn .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.ai-study-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 280px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  visibility: hidden;
+  pointer-events: none;
+  transition: all var(--transition);
+  z-index: 40;
+}
+
+.ai-study-menu.open .ai-study-dropdown {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.ai-study-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background var(--transition), transform var(--transition-fast);
+}
+
+.ai-study-link:hover {
+  background: var(--accent-soft);
+  transform: translateX(2px);
+}
+
+.ai-study-link svg:first-child {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.link-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.link-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.link-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.external-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.ai-study-link:hover .external-icon {
+  opacity: 1;
 }
 
 .messages-area {
@@ -1315,8 +1409,21 @@ kbd {
     min-width: 0;
   }
 
-  .protocol-toggle {
-    margin-left: auto;
+  .ai-study-menu {
+    order: 3;
+    width: 100%;
+  }
+
+  .ai-study-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ai-study-dropdown {
+    width: 100%;
+    min-width: 0;
+    left: 0;
+    right: auto;
   }
 
   .suggestion-cards,
@@ -1353,12 +1460,12 @@ kbd {
 }
 
 @media (max-width: 520px) {
-  .protocol-toggle {
+  .ai-study-menu {
     width: 100%;
   }
 
-  .protocol-btn {
-    flex: 1;
+  .ai-study-btn {
+    width: 100%;
   }
 
   .welcome-title {
